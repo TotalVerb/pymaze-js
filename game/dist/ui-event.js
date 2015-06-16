@@ -8,8 +8,8 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
   exports.get_key_help = get_key_help;
-  exports.createHandlers = createHandlers;
   exports.addHandler = addHandler;
+  exports.createHandlers = createHandlers;
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -92,7 +92,7 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
         if (this.inactive || this.x > x || this.x + this.w < x || this.y > y || this.y + this.h < y) {
           return;
         }
-        const result = this.call();
+        const result = this.call(x, y);
         if (result !== "persist") {
           this.inactive = true;
         }
@@ -101,6 +101,12 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
 
     return EventHandler;
   })();
+
+  function addHandler(x, y, w, h, call) {
+    const handler = new EventHandler(x, y, w, h, call);
+    handlers.push(handler);
+    return handler;
+  }
 
   function createHandlers() {
     _uiShared.canvas.addEventListener("mousedown", function (ev) {
@@ -122,11 +128,18 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
         ui_events.push(input);
       }
     }, false);
-  }
 
-  function addHandler(x, y, w, h, call) {
-    const handler = new EventHandler(x, y, w, h, call);
-    handlers.push(handler);
-    return handler;
+    // Add game area click handler
+    addHandler(0, 0, _uiShared.game_width, _uiShared.height, function (x, y) {
+      const [tilex, tiley] = [~ ~(x / _uiState.tile_size_x), ~ ~(y / _uiState.tile_size_y)];
+      if (tilex >= _uiState.state.maze.sizeX || tiley >= _uiState.state.maze.sizeY) {
+        return "persist";
+      } else if (_uiState.state.condition !== "running") {
+        return "persist";
+      } else {
+        ui_events.push(new _events.GoToSquare(_uiState.state.player, [tilex, tiley]));
+        return "persist";
+      }
+    });
   }
 });

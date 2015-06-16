@@ -1,4 +1,4 @@
-define(["exports", "events", "direction"], function (exports, _events, _direction) {
+define(["exports", "events", "direction", "guide"], function (exports, _events, _direction, _guide) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -21,8 +21,8 @@ define(["exports", "events", "direction"], function (exports, _events, _directio
       this.turbo_time = 0;
       this.turbo_left = 1;
       this._movement_counter = 0; // when 0, can move
-      this._facing = null; // direction facing
-      this._queued_facing = null;
+      this.facing = null; // direction facing
+      this.guide = null; // guide
     }
 
     _createClass(Entity, [{
@@ -35,20 +35,19 @@ define(["exports", "events", "direction"], function (exports, _events, _directio
             this.speed = this._real_speed;
           }
         }
-        if (this._movement_counter !== 0 || this._queued_facing === null) {
+        if (this._movement_counter !== 0) {
           return;
         }
 
-        var new_location = [this.location[0] + (0, _direction.dx)(this._queued_facing), this.location[1] + (0, _direction.dy)(this._queued_facing)];
+        // Update facing using the movement guide.
+        if (this.guide !== null) {
+          this.guide.guide(this, this.host.maze);
+        }
 
         // Check if destination is passable. If so, do the move.
         // Then reset the movement counter.
-        if (this.host.maze.get2(new_location)) {
-          this.location = new_location;
-          this._movement_counter = this.speed;
-          this._facing = this._queued_facing;
-        } else if (this._facing !== null) {
-          new_location = [this.location[0] + (0, _direction.dx)(this._facing), this.location[1] + (0, _direction.dy)(this._facing)];
+        if (this.facing !== null) {
+          const new_location = [this.location[0] + (0, _direction.dx)(this.facing), this.location[1] + (0, _direction.dy)(this.facing)];
 
           if (this.host.maze.get2(new_location)) {
             this.location = new_location;
@@ -60,7 +59,7 @@ define(["exports", "events", "direction"], function (exports, _events, _directio
       key: "process_event",
       value: function process_event(ev) {
         if (ev instanceof _events.ChangeDirection) {
-          this._queued_facing = ev.direction;
+          this.guide = new _guide.QueuedFacingGuide(ev.direction);
         } else if (ev instanceof _events.ActivateTurbo) {
           // Turbo can only be used once.
           if (this.turbo_left > 0) {
@@ -69,6 +68,8 @@ define(["exports", "events", "direction"], function (exports, _events, _directio
             this.turbo_time = 100;
             this.speed = Math.ceil(this.speed / 2);
           }
+        } else if (ev instanceof _events.GoToSquare) {
+          this.guide = new _guide.DestinationGuide(ev.destination);
         }
       }
     }]);

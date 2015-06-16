@@ -62,10 +62,10 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
 
         if (directions.length === 1) {
           return new _events.ChangeDirection(this, directions[0]);
-        } else if (this._facing !== null) {
+        } else if (this.facing !== null) {
           (function () {
             // Don't allow reversing.
-            var rev = (0, _direction.reverse_direction)(_this._facing);
+            var rev = (0, _direction.reverse_direction)(_this.facing);
             directions = directions.filter(function (dir) {
               return dir !== rev;
             });

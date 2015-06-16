@@ -18,6 +18,15 @@ define(["exports"], function (exports) {
 
   exports.ChangeDirection = ChangeDirection;
 
+  var GoToSquare = function GoToSquare(entity, destination) {
+    _classCallCheck(this, GoToSquare);
+
+    this.entity = entity;
+    this.destination = destination;
+  };
+
+  exports.GoToSquare = GoToSquare;
+
   var ActivateTurbo = function ActivateTurbo(entity) {
     _classCallCheck(this, ActivateTurbo);
 
