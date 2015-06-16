@@ -5,12 +5,6 @@ export const images = {};
 
 export const width = 800;
 export const height = 600;
-export const sidebar_width = 200;
-export const titlebar_height = 100;
-export const infobar_height = 350;
-export const game_width = width - sidebar_width;
-export const line_height = 30;
-export const title_height = 90;
 
 
 export function initialize_ui() {

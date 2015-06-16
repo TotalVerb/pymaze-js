@@ -1,16 +1,20 @@
 import {unpack} from "location";
 import {Restart} from "events";
 import {tile_size_x, tile_size_y, state} from "ui-state";
-import {
-  context, images, game_width, sidebar_width, title_height,
-  line_height, title_height, height, width, infobar_height
-  } from "ui-shared";
+import {context, images, height, width} from "ui-shared";
 import {get_key_help, ui_events} from "ui-event";
 import {Button} from "ui-button";
+import {fps} from "ui-perf";
+
+const sidebar_width = 200;
+const infobar_height = 350;
+export const game_width = width - sidebar_width;
+const line_height = 30;
+const title_height = 90;
 
 const buttons = [];
 
-function draw_entity(location, picture) {
+function paintImage(location, picture) {
   context.drawImage(
     images[picture],
     location[0] * tile_size_x,
@@ -33,12 +37,12 @@ function message(text, vh=height / 2) {
   context.fillText(text, width / 2, vh);
 }
 
-function draw_error(text) {
+function error(text) {
   greyout();
   message(text);
 }
 
-function draw_result(text) {
+function result(text) {
   greyout();
   message(text, height / 2 - 100);
 
@@ -53,23 +57,13 @@ function draw_result(text) {
   }
 }
 
-export function draw_buttons() {
+export function paintButtons() {
   for (let button of buttons) {
     button.draw();
   }
 }
 
-let last_time = window.performance.now();
-let fps = 0;
-
-function update_fps() {
-  const this_time = window.performance.now();
-  const diff = this_time - last_time;
-  last_time = this_time;
-  fps = 0.9 * fps + 100 / diff;
-}
-
-function status_bar() {
+function paintStatusBar() {
   // Clear
   context.fillStyle = '#FFFFFF';
   context.fillRect(
@@ -95,22 +89,7 @@ function status_bar() {
   }
 }
 
-export function paint_game() {
-  update_fps();
-
-  if (state === null) {
-    draw_error("Not ready");
-  } else if (state.condition === "running") {
-    draw_game_area();
-    status_bar();
-  } else if (state.condition === "won") {
-    draw_result("You won!");
-  } else if (state.condition === "lost") {
-    draw_result("You lost!");
-  }
-}
-
-export function draw_game_area() {
+function paintGameArea() {
   const player_loc = state.player.location;
 
   // Clear
@@ -120,21 +99,34 @@ export function draw_game_area() {
   for (let y = 0; y < state.maze.sizeY; y++) {
     for (let x = 0; x < state.maze.sizeX; x++) {
       if (!state.maze.get(x, y)) {
-        context.drawImage(images.wall, x * tile_size_x, y * tile_size_y, tile_size_x, tile_size_y);
+        paintImage([x, y], 'wall');
       }
     }
   }
 
   for (let exit of state.maze.exits) {
-    draw_entity(unpack(exit), 'goal');
+    paintImage(unpack(exit), 'goal');
   }
-  draw_entity(player_loc, 'player');
+  paintImage(player_loc, 'player');
   for (let enemy of state.enemies) {
-    draw_entity(enemy.location, 'enemy');
+    paintImage(enemy.location, 'enemy');
   }
 }
 
-export function draw_info_bar() {
+export function paintGame() {
+  if (state === null) {
+    error("Not ready");
+  } else if (state.condition === "running") {
+    paintGameArea();
+    paintStatusBar();
+  } else if (state.condition === "won") {
+    result("You won!");
+  } else if (state.condition === "lost") {
+    result("You lost!");
+  }
+}
+
+export function paintInfoBar() {
   // Draw background.
   context.fillStyle = "white";
   context.fillRect(game_width, 0, sidebar_width, height);

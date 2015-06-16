@@ -1,4 +1,5 @@
-import {game_width, height} from "ui-shared";
+import {height} from "ui-shared";
+import {game_width} from "ui-draw";
 
 export let state = null;
 export let dirty = false;
