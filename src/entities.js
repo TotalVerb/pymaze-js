@@ -1,5 +1,6 @@
-import {ChangeDirection, ActivateTurbo} from "events";
+import {ChangeDirection, ActivateTurbo, GoToSquare} from "events";
 import {dx, dy} from "direction";
+import {DestinationGuide, QueuedFacingGuide} from "guide";
 
 export class Entity {
 
@@ -12,8 +13,8 @@ export class Entity {
     this.turbo_time = 0;
     this.turbo_left = 1;
     this._movement_counter = 0;  // when 0, can move
-    this._facing = null;  // direction facing
-    this._queued_facing = null;
+    this.facing = null;  // direction facing
+    this.guide = null;  // guide
   }
 
   do_move() {
@@ -24,25 +25,21 @@ export class Entity {
         this.speed = this._real_speed;
       }
     }
-    if (this._movement_counter !== 0 || this._queued_facing === null) {
+    if (this._movement_counter !== 0) {
       return;
     }
 
-    let new_location = [
-      this.location[0] + dx(this._queued_facing),
-      this.location[1] + dy(this._queued_facing)
-    ];
+    // Update facing using the movement guide.
+    if (this.guide !== null) {
+      this.guide.guide(this, this.host.maze);
+    }
 
     // Check if destination is passable. If so, do the move.
     // Then reset the movement counter.
-    if (this.host.maze.get2(new_location)) {
-      this.location = new_location;
-      this._movement_counter = this.speed;
-      this._facing = this._queued_facing;
-    } else if (this._facing !== null) {
-      new_location = [
-        this.location[0] + dx(this._facing),
-        this.location[1] + dy(this._facing)
+    if (this.facing !== null) {
+      const new_location = [
+        this.location[0] + dx(this.facing),
+        this.location[1] + dy(this.facing)
       ];
 
       if (this.host.maze.get2(new_location)) {
@@ -54,7 +51,7 @@ export class Entity {
 
   process_event(ev) {
     if (ev instanceof ChangeDirection) {
-      this._queued_facing = ev.direction;
+      this.guide = new QueuedFacingGuide(ev.direction);
     } else if (ev instanceof ActivateTurbo) {
       // Turbo can only be used once.
       if (this.turbo_left > 0) {
@@ -63,6 +60,8 @@ export class Entity {
         this.turbo_time = 100;
         this.speed = Math.ceil(this.speed / 2);
       }
+    } else if (ev instanceof GoToSquare) {
+      this.guide = new DestinationGuide(ev.destination);
     }
   }
 }

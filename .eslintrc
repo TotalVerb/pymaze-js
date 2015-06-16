@@ -3,9 +3,9 @@
     "modules": true
   },
   "rules": {
-    "camelcase": false,
-    "no-underscore-dangle": false,
-    "quotes": false
+    "camelcase": 0,
+    "no-underscore-dangle": 0,
+    "quotes": 0
   },
   "env": {
     "browser": true,

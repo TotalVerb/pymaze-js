@@ -43,9 +43,9 @@ export class Enemy extends Entity {
 
     if (directions.length === 1) {
       return new ChangeDirection(this, directions[0]);
-    } else if (this._facing !== null) {
+    } else if (this.facing !== null) {
       // Don't allow reversing.
-      const rev = reverse_direction(this._facing);
+      const rev = reverse_direction(this.facing);
       directions = directions.filter(dir => dir !== rev);
     }
 

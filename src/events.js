@@ -7,6 +7,14 @@ export class ChangeDirection {
 }
 
 
+export class GoToSquare {
+  constructor(entity, destination) {
+    this.entity = entity;
+    this.destination = destination;
+  }
+}
+
+
 export class ActivateTurbo {
   constructor(entity) {
     this.entity = entity;

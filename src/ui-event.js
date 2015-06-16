@@ -1,7 +1,7 @@
 import {NORTH, WEST, SOUTH, EAST, dirname} from "direction";
-import {ChangeDirection, ActivateTurbo} from "events";
-import {canvas} from "ui-shared";
-import {state} from "ui-state";
+import {ChangeDirection, ActivateTurbo, GoToSquare} from "events";
+import {canvas, game_width, height} from "ui-shared";
+import {state, tile_size_x, tile_size_y} from "ui-state";
 
 // Polyfill offsetX / offsetY
 if (!MouseEvent.prototype.hasOwnProperty('offsetX')) {
@@ -79,11 +79,17 @@ class EventHandler {
       this.y > y || this.y + this.h < y) {
         return;
     }
-    const result = this.call();
+    const result = this.call(x, y);
     if (result !== "persist") {
       this.inactive = true;
     }
   }
+}
+
+export function addHandler(x, y, w, h, call) {
+  const handler = new EventHandler(x, y, w, h, call);
+  handlers.push(handler);
+  return handler;
 }
 
 export function createHandlers() {
@@ -106,10 +112,17 @@ export function createHandlers() {
       ui_events.push(input);
     }
   }, false);
-}
 
-export function addHandler(x, y, w, h, call) {
-  const handler = new EventHandler(x, y, w, h, call);
-  handlers.push(handler);
-  return handler;
+  // Add game area click handler
+  addHandler(0, 0, game_width, height, function(x, y) {
+    const [tilex, tiley] = [~~(x / tile_size_x), ~~(y / tile_size_y)];
+    if (tilex >= state.maze.sizeX || tiley >= state.maze.sizeY) {
+      return "persist";
+    } else if (state.condition !== "running") {
+      return "persist";
+    } else {
+      ui_events.push(new GoToSquare(state.player, [tilex, tiley]));
+      return "persist";
+    }
+  });
 }
