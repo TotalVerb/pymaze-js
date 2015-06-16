@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <title>Pymaze &mdash; JS Port</title>
+    <script data-main="dist/main" src="lib/require.js"></script>
+    <link rel="stylesheet" href="css/master.css" media="screen" title="no title" charset="utf-8">
+  </head>
+  <body>
+    <p id="preload">
+      Your browser does not support this version of the game.
+      Please consider using the <a href="legacy.html">legacy edition</a>
+      instead.
+    </p>
+    <p>This is a javascript port of pymaze.</p>
+    <canvas width="800" height="600" id="game_area">
+      Your browser does not support this game.
+    </canvas>
+
+    <img class="res-img" id="img-player" src="res/player.gif" />
+    <img class="res-img" id="img-wall" src="res/wall.gif" />
+    <img class="res-img" id="img-goal" src="res/goal.gif" />
+    <img class="res-img" id="img-enemy" src="res/enemy.gif" />
+
+    <audio src="res/entertainer.ogg" loop="loop" autoplay="autoplay"></audio>
+  </body>
+</html>
