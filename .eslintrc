@@ -1,0 +1,14 @@
+{
+  "ecmaFeatures": {
+    "modules": true
+  },
+  "rules": {
+    "camelcase": false,
+    "no-underscore-dangle": false,
+    "quotes": false
+  },
+  "env": {
+    "browser": true,
+    "es6": true
+  }
+}

@@ -1,0 +1,14 @@
+The entire project is licensed as specified in license.txt.
+
+One resource used is the music, the Entertainer by Scott Joplin.
+This work is in the public domain and was retrieved from
+<http://en.wikipedia.org/wiki/File:The_Entertainer_-_Scott_Joplin.ogg>.
+It was performed by Wikipedia user IE.
+
+The other resource used is the wall texture, again public domain,
+created by Titus Tscharntke and retrieved from
+<http://commons.wikimedia.org/wiki/File:Brown_brick_wall.jpg>.
+
+All files in the lib/ directory are external librarires appropriately
+licensed for this project are are copyright their respective
+developers.
