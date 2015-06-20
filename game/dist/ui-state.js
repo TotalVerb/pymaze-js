@@ -1,4 +1,4 @@
-define(["exports", "ui-shared"], function (exports, _uiShared) {
+define(["exports", "ui-shared", "ui-draw"], function (exports, _uiShared, _uiDraw) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -24,7 +24,7 @@ define(["exports", "ui-shared"], function (exports, _uiShared) {
     exports.complete_repaint_necessary = complete_repaint_necessary = true;
     exports.state = state = new_state;
 
-    exports.tile_size_x = tile_size_x = _uiShared.game_width / state.maze.sizeX;
+    exports.tile_size_x = tile_size_x = _uiDraw.game_width / state.maze.sizeX;
     exports.tile_size_y = tile_size_y = _uiShared.height / state.maze.sizeY;
   }
 

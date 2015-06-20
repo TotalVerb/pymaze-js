@@ -1,17 +1,23 @@
-define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "ui-button"], function (exports, _location, _events, _uiState, _uiShared, _uiEvent, _uiButton) {
+define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "ui-button", "ui-perf"], function (exports, _location, _events, _uiState, _uiShared, _uiEvent, _uiButton, _uiPerf) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  exports.draw_buttons = draw_buttons;
-  exports.paint_game = paint_game;
-  exports.draw_game_area = draw_game_area;
-  exports.draw_info_bar = draw_info_bar;
+  exports.paintButtons = paintButtons;
+  exports.paintGame = paintGame;
+  exports.paintInfoBar = paintInfoBar;
+
+  const sidebar_width = 200;
+  const infobar_height = 350;
+  const game_width = _uiShared.width - sidebar_width;
+  exports.game_width = game_width;
+  const line_height = 30;
+  const title_height = 90;
 
   const buttons = [];
 
-  function draw_entity(location, picture) {
+  function paintImage(location, picture) {
     _uiShared.context.drawImage(_uiShared.images[picture], location[0] * _uiState.tile_size_x, location[1] * _uiState.tile_size_y, _uiState.tile_size_x, _uiState.tile_size_y);
   }
 
@@ -28,12 +34,12 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
     _uiShared.context.fillText(text, _uiShared.width / 2, vh);
   }
 
-  function draw_error(text) {
+  function error(text) {
     greyout();
     message(text);
   }
 
-  function draw_result(text) {
+  function result(text) {
     greyout();
     message(text, _uiShared.height / 2 - 100);
 
@@ -46,29 +52,19 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
     }
   }
 
-  function draw_buttons() {
+  function paintButtons() {
     for (var button of buttons) {
       button.draw();
     }
   }
 
-  var last_time = window.performance.now();
-  var fps = 0;
-
-  function update_fps() {
-    const this_time = window.performance.now();
-    const diff = this_time - last_time;
-    last_time = this_time;
-    fps = 0.9 * fps + 100 / diff;
-  }
-
-  function status_bar() {
+  function paintStatusBar() {
     // Clear
     _uiShared.context.fillStyle = "#FFFFFF";
-    _uiShared.context.fillRect(_uiShared.game_width, _uiShared.infobar_height, _uiShared.sidebar_width, _uiShared.height - _uiShared.infobar_height);
+    _uiShared.context.fillRect(game_width, infobar_height, sidebar_width, _uiShared.height - infobar_height);
 
     // Draw text
-    const text = [[`${ _uiState.state.fps.toFixed(1) } FPS`, "#000000"], [`${ fps.toFixed(1) } GFPS`, "#000000"], [`Turbo left: ${ _uiState.state.player.turbo_left }`, "#0000FF"]];
+    const text = [[`${ _uiState.state.fps.toFixed(1) } FPS`, "#000000"], [`${ _uiPerf.fps.toFixed(1) } GFPS`, "#000000"], [`Turbo left: ${ _uiState.state.player.turbo_left }`, "#0000FF"]];
     if (_uiState.state.player.turbo_time) {
       text.push(["TURBO ON", "#FF0000"]);
     }
@@ -79,71 +75,74 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
 
     for (var i = 0; i < text.length; i++) {
       _uiShared.context.fillStyle = text[i][1];
-      _uiShared.context.fillText(text[i][0], _uiShared.width - 5, i * _uiShared.line_height + _uiShared.infobar_height + 5);
+      _uiShared.context.fillText(text[i][0], _uiShared.width - 5, i * line_height + infobar_height + 5);
     }
   }
 
-  function paint_game() {
-    update_fps();
-
-    if (_uiState.state === null) {
-      draw_error("Not ready");
-    } else if (_uiState.state.condition === "running") {
-      draw_game_area();
-      status_bar();
-    } else if (_uiState.state.condition === "won") {
-      draw_result("You won!");
-    } else if (_uiState.state.condition === "lost") {
-      draw_result("You lost!");
-    }
-  }
-
-  function draw_game_area() {
+  function paintGameArea() {
     const player_loc = _uiState.state.player.location;
 
     // Clear
     _uiShared.context.fillStyle = "white";
-    _uiShared.context.fillRect(0, 0, _uiShared.game_width, _uiShared.height);
+    _uiShared.context.fillRect(0, 0, game_width, _uiShared.height);
 
     for (var y = 0; y < _uiState.state.maze.sizeY; y++) {
       for (var x = 0; x < _uiState.state.maze.sizeX; x++) {
         if (!_uiState.state.maze.get(x, y)) {
-          _uiShared.context.drawImage(_uiShared.images.wall, x * _uiState.tile_size_x, y * _uiState.tile_size_y, _uiState.tile_size_x, _uiState.tile_size_y);
+          paintImage([x, y], "wall");
         }
       }
     }
 
     for (var exit of _uiState.state.maze.exits) {
-      draw_entity((0, _location.unpack)(exit), "goal");
+      paintImage((0, _location.unpack)(exit), "goal");
     }
-    draw_entity(player_loc, "player");
+    paintImage(player_loc, "player");
     for (var enemy of _uiState.state.enemies) {
-      draw_entity(enemy.location, "enemy");
+      paintImage(enemy.location, enemy.right_image());
     }
   }
 
-  function draw_info_bar() {
+  function paintGame() {
+    if (_uiState.state === null) {
+      error("Not ready");
+    } else if (_uiState.state.condition === "running") {
+      paintGameArea();
+      paintStatusBar();
+    } else if (_uiState.state.condition === "won") {
+      result("You won!");
+    } else if (_uiState.state.condition === "lost") {
+      result("You lost!");
+    }
+  }
+
+  function paintInfoBar() {
     // Draw background.
     _uiShared.context.fillStyle = "white";
-    _uiShared.context.fillRect(_uiShared.game_width, 0, _uiShared.sidebar_width, _uiShared.height);
+    _uiShared.context.fillRect(game_width, 0, sidebar_width, _uiShared.height);
 
     // Draw title.
     _uiShared.context.font = "30px sans-serif";
     _uiShared.context.textAlign = "center";
     _uiShared.context.textBaseline = "top";
     _uiShared.context.fillStyle = "black";
-    _uiShared.context.fillText("PYMAZE", _uiShared.game_width + _uiShared.sidebar_width / 2, 10);
+    _uiShared.context.fillText("PYMAZE", game_width + sidebar_width / 2, 10);
 
     const instructions = ["Instructions"];
     const help = (0, _uiEvent.get_key_help)();
     for (var [k, v] of help) {
-      instructions.push(`${ k }: ${ v }`);
+      if (v.length + k.length < 20) {
+        instructions.push(`${ k }: ${ v }`);
+      } else {
+        instructions.push(k + ":");
+        instructions.push("  " + v);
+      }
     }
 
     _uiShared.context.font = "15px sans-serif";
     _uiShared.context.textAlign = "left";
     for (var i = 0; i < instructions.length; i++) {
-      _uiShared.context.fillText(instructions[i], _uiShared.game_width + 5, (i + 1) * _uiShared.line_height + _uiShared.title_height);
+      _uiShared.context.fillText(instructions[i], game_width + 5, (i + 1) * line_height + title_height);
     }
   }
 });

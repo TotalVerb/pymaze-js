@@ -13,14 +13,11 @@ define(["exports", "enemy", "entities", "mazemaker", "location"], function (expo
 
   var GameState = (function () {
     function GameState() {
-      var maze = arguments[0] === undefined ? null : arguments[0];
-      var enemies = arguments[1] === undefined ? 10 : arguments[1];
+      var maze = arguments[0] === undefined ? (0, _mazemaker.depth_first_generate)(13, 13) : arguments[0];
+      var enemies = arguments[1] === undefined ? 9 : arguments[1];
 
       _classCallCheck(this, GameState);
 
-      if (maze === null) {
-        maze = (0, _mazemaker.depth_first_generate)(16, 16);
-      }
       this.maze = maze;
       this.player = new _entities.Entity([1, 1], this);
       this.enemies = [];

@@ -35,6 +35,11 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
         if (this._current_tick >= this._ai_delay) {
           this._current_tick = 0;
 
+          if (Math.random() > 0.9) {
+            // 10% chance of changing versions.
+            this.version = ~ ~(1 + 2 * Math.random());
+          }
+
           if (this.version === 1) {
             return this.move1();
           } else if (this.version === 2) {
@@ -87,6 +92,17 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
           return this.move2();
         } else {
           return this.move1();
+        }
+      }
+    }, {
+      key: "right_image",
+      value: function right_image() {
+        if (this.version === 1) {
+          return "enemy-1";
+        } else if (this.version === 2) {
+          return "enemy-2";
+        } else {
+          return _pathfind.euclid(this.location, this.host.player.location) < 15 ? "enemy-2" : "enemy-1";
         }
       }
     }]);

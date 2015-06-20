@@ -1,4 +1,4 @@
-define(["exports", "ui-state", "ui-shared", "ui-draw", "ui-event"], function (exports, _uiState, _uiShared, _uiDraw, _uiEvent) {
+define(["exports", "ui-state", "ui-shared", "ui-draw", "ui-event", "ui-perf"], function (exports, _uiState, _uiShared, _uiDraw, _uiEvent, _uiPerf) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -31,21 +31,23 @@ define(["exports", "ui-state", "ui-shared", "ui-draw", "ui-event"], function (ex
     }
 
     if (_uiState.complete_repaint_necessary) {
-      (0, _uiDraw.draw_info_bar)();
-      (0, _uiDraw.paint_game)();
+      (0, _uiDraw.paintInfoBar)();
+      (0, _uiDraw.paintGame)();
       (0, _uiState.done_paint)();
     } else if (_uiState.dirty) {
-      (0, _uiDraw.paint_game)();
+      (0, _uiDraw.paintGame)();
       (0, _uiState.done_paint)();
     }
 
-    (0, _uiDraw.draw_buttons)();
+    (0, _uiDraw.paintButtons)();
+    (0, _uiPerf.updateFPS)();
   }
 
   function* poll() {
     while (_uiEvent.ui_events.length) {
       yield _uiEvent.ui_events.shift();
     }
+    yield* (0, _uiEvent.spontaneous_events)();
   }
 
   function start() {
@@ -56,23 +58,4 @@ define(["exports", "ui-state", "ui-shared", "ui-draw", "ui-event"], function (ex
     started = true;
     setInterval(frame, 1000 / 24); // 24 FPS
   }
-
-  /*
-      def draw(self):
-          # Generate all the elements.
-          status = this.gen_status_bar()
-          game_area = this.gen_game_area()
-          overlay = this.gen_overlay()
-  
-          # Blit the separate elements onto the main display.
-          this.display.blit(game_area, (0, 0))
-          this.display.blit(this.infoBar, (this._gameAreaWidth, 0))
-          this.display.blit(status, (this._gameAreaWidth, this._infoBarHeight))
-          if overlay:
-              this.display.blit(overlay, (0, 0))
-  
-          # TODO: Optimize by only updating the changed rects
-          pygame.display.update()
-  
-  */
 });

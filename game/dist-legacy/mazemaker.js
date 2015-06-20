@@ -10,9 +10,9 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
   // Higher value = more spacious
   // Don't set too high or maze will take a long time to generate.
 
-  var POROSITY = 0.7;
+  var POROSITY = 0.75;
 
-  function make_exit(maze) {
+  function setExit(maze) {
     /** Generate exit at last available square. */
     for (var x = maze.sizeX - 1; x >= 0; x--) {
       for (var y = maze.sizeY - 1; y >= 0; y--) {
@@ -24,7 +24,7 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
     }
   }
 
-  function make_entrance(maze) {
+  function setEntrance(maze) {
     /** Generate entrance at first available square. */
     for (var x = 0; x < maze.sizeX; x++) {
       for (var y = 0; y < maze.sizeY; y++) {
@@ -36,7 +36,7 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
     }
   }
 
-  function make_maze_from_edges(passable, edges_h, edges_v) {
+  function compileMaze(passable, edges_h, edges_v) {
     var maze = new _grid.MazeGrid(edges_v.length + passable.length, edges_h[0].length + passable[0].length);
 
     for (var x = 0; x < maze.sizeX; x++) {
@@ -59,8 +59,8 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
       }
     }
 
-    make_entrance(maze);
-    make_exit(maze);
+    setEntrance(maze);
+    setExit(maze);
     return maze;
   }
 
@@ -100,17 +100,11 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
           var nextx = last[0] + (0, _direction.dx)(di);
           var nexty = last[1] + (0, _direction.dy)(di);
 
-          if (nextx < 0 || nexty < 0 || nextx >= width || nexty >= height) {
-            continue;
+          // (1) inside game bounds
+          // (2) not traversed too many times
+          if (nextx >= 0 && nexty >= 0 && nextx < width && nexty < height && passable[nextx][nexty] < POROSITY) {
+            possible.push(di);
           }
-
-          // print(di)
-          if (passable[nextx][nexty] >= POROSITY) {
-            // print('already been here')
-            continue;
-          }
-
-          possible.push(di);
         }
       } catch (err) {
         _didIteratorError = true;
@@ -128,7 +122,7 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
       }
 
       if (possible.length === 0) {
-        // backtrack
+        // no way to proceeed; backtrack
         record.pop();
         continue;
       } else {
@@ -150,7 +144,7 @@ define(["exports", "grid", "direction"], function (exports, _grid, _direction) {
       }
     }
 
-    return make_maze_from_edges(passable, edges_h, edges_v);
+    return compileMaze(passable, edges_h, edges_v);
   }
 });
 

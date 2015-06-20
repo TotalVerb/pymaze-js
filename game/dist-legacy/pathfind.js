@@ -25,24 +25,24 @@ define(["exports", "location", "direction"], function (exports, _location, _dire
   }
 
   function astar(maze, start, end) {
-    var packed_start = (0, _location.pack2)(start);
-    var packed_end = (0, _location.pack2)(end);
+    var p_start = (0, _location.pack2)(start);
+    var p_end = (0, _location.pack2)(end);
 
     var closed_set = new Set(); // The set of nodes already evaluated.
 
     // The set of tentative nodes to be evaluated,
     // initially containing the start node
-    var open_set = new Set([packed_start]);
+    var open_set = new Set([p_start]);
     var came_from = {}; // The map of navigated nodes.
 
     // Cost from start along best known path.
-    var g_score = _defineProperty({}, packed_start, 0);
+    var g_score = _defineProperty({}, p_start, 0);
 
     // Estimated total cost from start to goal through y.
-    var f_score = _defineProperty({}, packed_start, g_score[packed_start] + euclid(start, end));
+    var f_score = _defineProperty({}, p_start, g_score[p_start] + euclid(start, end));
 
     while (open_set.size) {
-      var packed_current = null;
+      var p_current = null;
       var best_score = Infinity;
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -54,7 +54,7 @@ define(["exports", "location", "direction"], function (exports, _location, _dire
 
           var candidate_score = f_score[candidate];
           if (candidate_score < best_score) {
-            packed_current = candidate;
+            p_current = candidate;
             best_score = candidate_score;
           }
         }
@@ -73,8 +73,8 @@ define(["exports", "location", "direction"], function (exports, _location, _dire
         }
       }
 
-      if (packed_current === packed_end) {
-        var rp = reconstruct_path(came_from, packed_end);
+      if (p_current === p_end) {
+        var rp = reconstruct_path(came_from, p_end);
 
         var _unpack = (0, _location.unpack)(rp[rp.length - 2]);
 
@@ -89,9 +89,9 @@ define(["exports", "location", "direction"], function (exports, _location, _dire
         };
       }
 
-      var current = (0, _location.unpack)(packed_current);
-      open_set["delete"](packed_current);
-      closed_set.add(packed_current);
+      var current = (0, _location.unpack)(p_current);
+      open_set["delete"](p_current);
+      closed_set.add(p_current);
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
@@ -100,19 +100,19 @@ define(["exports", "location", "direction"], function (exports, _location, _dire
         for (var _iterator2 = maze.get_neighbours(current[0], current[1])[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
           var neighbour = _step2.value;
 
-          var packed_neighbour = (0, _location.pack2)(neighbour);
+          var p_neighbour = (0, _location.pack2)(neighbour);
 
-          if (closed_set.has(packed_neighbour)) {
+          if (closed_set.has(p_neighbour)) {
             continue;
           }
           var tentative_g_score = g_score[current] + 1;
 
-          var not_evaluate = !open_set.has(packed_neighbour);
-          if (not_evaluate || tentative_g_score < g_score[packed_neighbour]) {
-            came_from[packed_neighbour] = packed_current;
-            g_score[packed_neighbour] = tentative_g_score;
-            f_score[packed_neighbour] = g_score[packed_neighbour] + euclid(neighbour, end);
-            open_set.add(packed_neighbour);
+          var not_evaluate = !open_set.has(p_neighbour);
+          if (not_evaluate || tentative_g_score < g_score[p_neighbour]) {
+            came_from[p_neighbour] = p_current;
+            g_score[p_neighbour] = tentative_g_score;
+            f_score[p_neighbour] = g_score[p_neighbour] + euclid(neighbour, end);
+            open_set.add(p_neighbour);
           }
         }
       } catch (err) {

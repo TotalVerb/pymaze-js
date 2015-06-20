@@ -10,12 +10,9 @@ define(["exports", "enemy", "entities", "mazemaker", "location"], function (expo
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
   var GameState = (function () {
-    function GameState(maze = null, enemies = 10) {
+    function GameState(maze = (0, _mazemaker.depth_first_generate)(13, 13), enemies = 9) {
       _classCallCheck(this, GameState);
 
-      if (maze === null) {
-        maze = (0, _mazemaker.depth_first_generate)(16, 16);
-      }
       this.maze = maze;
       this.player = new _entities.Entity([1, 1], this);
       this.enemies = [];

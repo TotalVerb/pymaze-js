@@ -17,20 +17,8 @@ define(['exports'], function (exports) {
   var width = 800;
   exports.width = width;
   var height = 600;
-  exports.height = height;
-  var sidebar_width = 200;
-  exports.sidebar_width = sidebar_width;
-  var titlebar_height = 100;
-  exports.titlebar_height = titlebar_height;
-  var infobar_height = 350;
-  exports.infobar_height = infobar_height;
-  var game_width = width - sidebar_width;
-  exports.game_width = game_width;
-  var line_height = 30;
-  exports.line_height = line_height;
-  var title_height = 90;
 
-  exports.title_height = title_height;
+  exports.height = height;
 
   function initialize_ui() {
     var preload = document.getElementById('preload');

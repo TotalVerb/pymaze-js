@@ -10,6 +10,8 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
   exports.get_key_help = get_key_help;
   exports.addHandler = addHandler;
   exports.createHandlers = createHandlers;
+  exports.spontaneous_events = spontaneous_events;
+  var marked0$0 = [spontaneous_events].map(regeneratorRuntime.mark);
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -36,6 +38,9 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
   var mousey = 0;
 
   exports.mousey = mousey;
+  // If there's a touch screen, use different instructions.
+  var supportsTouch = "ontouchstart" in window || window.navigator.msMaxTouchPoints > 0;
+
   var DIRECTION_KEYS = {
     w: _direction.NORTH,
     a: _direction.WEST,
@@ -48,11 +53,17 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
 
   function get_key_help() {
     var dct = new Map();
-    for (var k in DIRECTION_KEYS) {
-      dct.set(k, "Move " + (0, _direction.dirname)(DIRECTION_KEYS[k]));
+
+    if (supportsTouch) {
+      dct.set("Touch map", "Move towards square");
+      dct.set("Hold finger down", "Turbo mode");
+    } else {
+      for (var k in DIRECTION_KEYS) {
+        dct.set(k, "Move " + (0, _direction.dirname)(DIRECTION_KEYS[k]));
+      }
+      dct.set(STOP_MOTION_KEY, "Stop moving");
+      dct.set(TURBO_KEY, "Turbo mode");
     }
-    dct.set(STOP_MOTION_KEY, "Stop moving");
-    dct.set(TURBO_KEY, "Turbo mode");
 
     return dct;
   }
@@ -108,6 +119,8 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
     return handler;
   }
 
+  var touching = 0;
+
   function createHandlers() {
     _uiShared.canvas.addEventListener("mousedown", function (ev) {
       var x = ev.offsetX;
@@ -140,7 +153,12 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
       handlers = handlers.filter(function (h) {
         return !h.inactive;
       });
+      touching = Date.now();
     }, false);
+
+    _uiShared.canvas.addEventListener("mouseup", function () {
+      touching = 0;
+    });
 
     _uiShared.canvas.addEventListener("mousemove", function (ev) {
       exports.mousex = mousex = ev.offsetX;
@@ -169,4 +187,30 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
       }
     });
   }
+
+  function spontaneous_events() {
+    return regeneratorRuntime.wrap(function spontaneous_events$(context$1$0) {
+      while (1) switch (context$1$0.prev = context$1$0.next) {
+        case 0:
+          if (!(touching !== 0)) {
+            context$1$0.next = 4;
+            break;
+          }
+
+          if (!(Date.now() > touching + 500)) {
+            context$1$0.next = 4;
+            break;
+          }
+
+          context$1$0.next = 4;
+          return new _events.ActivateTurbo(_uiState.state.player);
+
+        case 4:
+        case "end":
+          return context$1$0.stop();
+      }
+    }, marked0$0[0], this);
+  }
 });
+
+// Touch for more than half second -> turbo
