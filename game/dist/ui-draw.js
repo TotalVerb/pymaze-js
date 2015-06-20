@@ -1,4 +1,4 @@
-define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "ui-button", "ui-perf"], function (exports, _location, _events, _uiState, _uiShared, _uiEvent, _uiButton, _uiPerf) {
+define(["exports", "location", "direction", "events", "ui-state", "ui-shared", "ui-event", "ui-button", "ui-perf"], function (exports, _location, _direction, _events, _uiState, _uiShared, _uiEvent, _uiButton, _uiPerf) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -79,9 +79,17 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
     }
   }
 
-  function paintGameArea() {
-    const player_loc = _uiState.state.player.location;
+  function semi_location(entity) {
+    var partial = entity.movement_counter / entity.speed;
+    if (_uiState.state.condition !== "running") {
+      partial = 0;
+    }
+    var undo_x = -(0, _direction.dx)(entity.facing) * partial;
+    var undo_y = -(0, _direction.dy)(entity.facing) * partial;
+    return [entity.location[0] + undo_x, entity.location[1] + undo_y];
+  }
 
+  function paintGameArea() {
     // Clear
     _uiShared.context.fillStyle = "white";
     _uiShared.context.fillRect(0, 0, game_width, _uiShared.height);
@@ -97,9 +105,9 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
     for (var exit of _uiState.state.maze.exits) {
       paintImage((0, _location.unpack)(exit), "goal");
     }
-    paintImage(player_loc, "player");
+    paintImage(semi_location(_uiState.state.player), "player");
     for (var enemy of _uiState.state.enemies) {
-      paintImage(enemy.location, enemy.right_image());
+      paintImage(semi_location(enemy), enemy.right_image());
     }
   }
 
@@ -110,8 +118,10 @@ define(["exports", "location", "events", "ui-state", "ui-shared", "ui-event", "u
       paintGameArea();
       paintStatusBar();
     } else if (_uiState.state.condition === "won") {
+      paintGameArea();
       result("You won!");
     } else if (_uiState.state.condition === "lost") {
+      paintGameArea();
       result("You lost!");
     }
   }

@@ -15,22 +15,6 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  // Polyfill offsetX / offsetY
-  if (!MouseEvent.prototype.hasOwnProperty("offsetX")) {
-    Object.defineProperties(MouseEvent.prototype, {
-      offsetX: {
-        get: function get() {
-          return this.clientX - this.target.getBoundingClientRect().left;
-        }
-      },
-      offsetY: {
-        get: function get() {
-          return this.clientY - this.target.getBoundingClientRect().top;
-        }
-      }
-    });
-  }
-
   // Define constants and state constants.
   var handlers = [];
   var mousex = 0;
@@ -122,7 +106,7 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
   var touching = 0;
 
   function createHandlers() {
-    _uiShared.canvas.addEventListener("mousedown", function (ev) {
+    _uiShared.canvas.addEventListener("pointerdown", function (ev) {
       var x = ev.offsetX;
       var y = ev.offsetY;
       var _iteratorNormalCompletion = true;
@@ -156,11 +140,11 @@ define(["exports", "direction", "events", "ui-shared", "ui-state"], function (ex
       touching = Date.now();
     }, false);
 
-    _uiShared.canvas.addEventListener("mouseup", function () {
+    _uiShared.canvas.addEventListener("pointerup", function () {
       touching = 0;
     });
 
-    _uiShared.canvas.addEventListener("mousemove", function (ev) {
+    _uiShared.canvas.addEventListener("pointermove", function (ev) {
       exports.mousex = mousex = ev.offsetX;
       exports.mousey = mousey = ev.offsetY;
     }, false);

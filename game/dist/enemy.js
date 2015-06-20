@@ -20,10 +20,10 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
       _get(Object.getPrototypeOf(Enemy.prototype), "constructor", this).call(this, location, host);
 
       this.version = version;
-      this.speed = 12;
+      this.speed = 10;
 
-      this._ai_delay = this.speed; // Glitches may occur if not set to speed.
-      this._current_tick = 0;
+      this._ai_delay = 20;
+      this._current_tick = ~ ~(Math.random() * 20); // each AI offset for speed
     }
 
     _inherits(Enemy, _Entity);
@@ -50,13 +50,6 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
         }
       }
     }, {
-      key: "chase_player",
-      value: function chase_player() {
-        const start = this.location;
-        const end = this.host.player.location;
-        return _pathfind.astar(this.host.maze, start, end);
-      }
-    }, {
       key: "move1",
       value: function move1() {
         // move1 is almost random, but never reverses if possible.
@@ -78,8 +71,7 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
       key: "move2",
       value: function move2() {
         // move2 is the 'chaser' mode
-        const path = this.chase_player();
-        return new _events.ChangeDirection(this, path.direction);
+        return new _events.GoToSquare(this, this.host.player.location);
       }
     }, {
       key: "move3",
@@ -98,11 +90,11 @@ define(["exports", "events", "entities", "direction", "pathfind"], function (exp
       key: "right_image",
       value: function right_image() {
         if (this.version === 1) {
-          return "enemy-1";
-        } else if (this.version === 2) {
           return "enemy-2";
+        } else if (this.version === 2) {
+          return "enemy-1";
         } else {
-          return _pathfind.euclid(this.location, this.host.player.location) < 15 ? "enemy-2" : "enemy-1";
+          return _pathfind.euclid(this.location, this.host.player.location) < 15 ? "enemy-1" : "enemy-2";
         }
       }
     }]);
