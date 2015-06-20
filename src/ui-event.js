@@ -24,6 +24,10 @@ let handlers = [];
 export let mousex = 0;
 export let mousey = 0;
 
+// If there's a touch screen, use different instructions.
+const supportsTouch = ("ontouchstart" in window) ||
+                      window.navigator.msMaxTouchPoints > 0;
+
 const DIRECTION_KEYS = {
   w: NORTH,
   a: WEST,
@@ -36,11 +40,17 @@ const TURBO_KEY = 't';
 
 export function get_key_help() {
   const dct = new Map();
-  for (let k in DIRECTION_KEYS) {
-    dct.set(k, 'Move ' + dirname(DIRECTION_KEYS[k]));
+
+  if (supportsTouch) {
+    dct.set('Touch map', 'Move towards square');
+    dct.set('Hold finger down', 'Turbo mode');
+  } else {
+    for (let k in DIRECTION_KEYS) {
+      dct.set(k, 'Move ' + dirname(DIRECTION_KEYS[k]));
+    }
+    dct.set(STOP_MOTION_KEY, 'Stop moving');
+    dct.set(TURBO_KEY, 'Turbo mode');
   }
-  dct.set(STOP_MOTION_KEY, 'Stop moving');
-  dct.set(TURBO_KEY, 'Turbo mode');
 
   return dct;
 }
@@ -92,6 +102,8 @@ export function addHandler(x, y, w, h, call) {
   return handler;
 }
 
+let touching = 0;
+
 export function createHandlers() {
   canvas.addEventListener("mousedown", function(ev) {
     const [x, y] = [ev.offsetX, ev.offsetY];
@@ -99,7 +111,12 @@ export function createHandlers() {
       handler.run(x, y);
     }
     handlers = handlers.filter(h => !h.inactive);
+    touching = Date.now();
   }, false);
+
+  canvas.addEventListener("mouseup", function() {
+    touching = 0;
+  });
 
   canvas.addEventListener("mousemove", function(ev) {
     mousex = ev.offsetX;
@@ -125,4 +142,13 @@ export function createHandlers() {
       return "persist";
     }
   });
+}
+
+export function* spontaneous_events() {
+  if (touching !== 0) {
+    if (Date.now() > touching + 500) {
+      // Touch for more than half second -> turbo
+      yield new ActivateTurbo(state.player);
+    }
+  }
 }

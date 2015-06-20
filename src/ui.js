@@ -2,7 +2,7 @@ import {done_paint} from "ui-state";
 import {initialized, initialize_ui} from "ui-shared";
 import {paintInfoBar, paintGame, paintButtons} from "ui-draw";
 import {dirty, complete_repaint_necessary} from "ui-state";
-import {createHandlers, ui_events} from "ui-event";
+import {createHandlers, ui_events, spontaneous_events} from "ui-event";
 import {updateFPS} from "ui-perf";
 export {repaint, changeState} from "ui-state";
 
@@ -34,6 +34,7 @@ export function* poll() {
   while (ui_events.length) {
     yield ui_events.shift();
   }
+  yield* spontaneous_events();
 }
 
 export function start() {

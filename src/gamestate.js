@@ -4,7 +4,7 @@ import {depth_first_generate} from "mazemaker";
 import {pack2} from "location";
 
 export class GameState {
-  constructor(maze=depth_first_generate(14, 14), enemies=9) {
+  constructor(maze=depth_first_generate(13, 13), enemies=9) {
     this.maze = maze;
     this.player = new Entity([1, 1], this);
     this.enemies = [];

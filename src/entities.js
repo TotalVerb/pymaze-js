@@ -57,7 +57,7 @@ export class Entity {
       if (this.turbo_left > 0) {
         this.turbo_left -= 1;
         this._real_speed = this.speed;
-        this.turbo_time = 100;
+        this.turbo_time = 80;
         this.speed = Math.ceil(this.speed / 2);
       }
     } else if (ev instanceof GoToSquare) {

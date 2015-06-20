@@ -109,7 +109,7 @@ function paintGameArea() {
   }
   paintImage(player_loc, 'player');
   for (let enemy of state.enemies) {
-    paintImage(enemy.location, 'enemy');
+    paintImage(enemy.location, enemy.right_image());
   }
 }
 
@@ -141,7 +141,12 @@ export function paintInfoBar() {
   const instructions = ["Instructions"];
   const help = get_key_help();
   for (let [k, v] of help) {
-    instructions.push(`${k}: ${v}`);
+    if (v.length + k.length < 20) {
+      instructions.push(`${k}: ${v}`);
+    } else {
+      instructions.push(k + ':');
+      instructions.push('  ' + v);
+    }
   }
 
   context.font = "15px sans-serif";

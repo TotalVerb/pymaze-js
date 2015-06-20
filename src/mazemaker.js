@@ -5,7 +5,7 @@ import {dx, dy, NORTH, WEST, SOUTH, EAST} from "direction";
 // Higher value = more spacious
 // Don't set too high or maze will take a long time to generate.
 
-const POROSITY = 0.72;
+const POROSITY = 0.75;
 
 function setExit(maze) {
   /** Generate exit at last available square. */
