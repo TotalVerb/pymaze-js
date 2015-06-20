@@ -1,4 +1,5 @@
 import {unpack} from "location";
+import {dx, dy} from "direction";
 import {Restart} from "events";
 import {tile_size_x, tile_size_y, state} from "ui-state";
 import {context, images, height, width} from "ui-shared";
@@ -89,9 +90,17 @@ function paintStatusBar() {
   }
 }
 
-function paintGameArea() {
-  const player_loc = state.player.location;
+function semi_location(entity) {
+  let partial = entity.movement_counter / entity.speed;
+  if (state.condition !== "running") {
+    partial = 0;
+  }
+  let undo_x = -dx(entity.facing) * partial;
+  let undo_y = -dy(entity.facing) * partial;
+  return [entity.location[0] + undo_x, entity.location[1] + undo_y];
+}
 
+function paintGameArea() {
   // Clear
   context.fillStyle = 'white';
   context.fillRect(0, 0, game_width, height);
@@ -107,9 +116,9 @@ function paintGameArea() {
   for (let exit of state.maze.exits) {
     paintImage(unpack(exit), 'goal');
   }
-  paintImage(player_loc, 'player');
+  paintImage(semi_location(state.player), 'player');
   for (let enemy of state.enemies) {
-    paintImage(enemy.location, enemy.right_image());
+    paintImage(semi_location(enemy), enemy.right_image());
   }
 }
 
@@ -120,8 +129,10 @@ export function paintGame() {
     paintGameArea();
     paintStatusBar();
   } else if (state.condition === "won") {
+    paintGameArea();
     result("You won!");
   } else if (state.condition === "lost") {
+    paintGameArea();
     result("You lost!");
   }
 }

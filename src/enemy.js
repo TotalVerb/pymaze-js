@@ -1,4 +1,4 @@
-import {ChangeDirection} from "events";
+import {ChangeDirection, GoToSquare} from "events";
 import {Entity} from "entities";
 import {reverse_direction} from "direction";
 import * as pathfind from "pathfind";
@@ -9,10 +9,10 @@ export class Enemy extends Entity {
     super(location, host);
 
     this.version = version;
-    this.speed = 12;
+    this.speed = 10;
 
-    this._ai_delay = this.speed;  // Glitches may occur if not set to speed.
-    this._current_tick = 0;
+    this._ai_delay = 20;
+    this._current_tick = ~~(Math.random() * 20);  // each AI offset for speed
   }
 
   move() {
@@ -35,12 +35,6 @@ export class Enemy extends Entity {
     }
   }
 
-  chase_player() {
-    const start = this.location;
-    const end = this.host.player.location;
-    return pathfind.astar(this.host.maze, start, end);
-  }
-
   move1() {
     // move1 is almost random, but never reverses if possible.
 
@@ -60,8 +54,7 @@ export class Enemy extends Entity {
 
   move2() {
     // move2 is the 'chaser' mode
-    const path = this.chase_player();
-    return new ChangeDirection(this, path.direction);
+    return new GoToSquare(this, this.host.player.location);
   }
 
   move3() {
@@ -78,13 +71,13 @@ export class Enemy extends Entity {
 
   right_image() {
     if (this.version === 1) {
-      return "enemy-1";
-    } else if (this.version === 2) {
       return "enemy-2";
+    } else if (this.version === 2) {
+      return "enemy-1";
     } else {
       return (
         pathfind.euclid(this.location, this.host.player.location) < 15
-        ? "enemy-2" : "enemy-1"
+        ? "enemy-1" : "enemy-2"
       );
     }
   }

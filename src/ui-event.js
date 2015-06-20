@@ -3,22 +3,6 @@ import {ChangeDirection, ActivateTurbo, GoToSquare} from "events";
 import {canvas, game_width, height} from "ui-shared";
 import {state, tile_size_x, tile_size_y} from "ui-state";
 
-// Polyfill offsetX / offsetY
-if (!MouseEvent.prototype.hasOwnProperty('offsetX')) {
-  Object.defineProperties(MouseEvent.prototype, {
-    offsetX: {
-      get: function() {
-        return this.clientX - this.target.getBoundingClientRect().left;
-      }
-    },
-    offsetY: {
-      get: function() {
-        return this.clientY - this.target.getBoundingClientRect().top;
-      }
-    }
-  });
-}
-
 // Define constants and state constants.
 let handlers = [];
 export let mousex = 0;
@@ -105,7 +89,7 @@ export function addHandler(x, y, w, h, call) {
 let touching = 0;
 
 export function createHandlers() {
-  canvas.addEventListener("mousedown", function(ev) {
+  canvas.addEventListener("pointerdown", function(ev) {
     const [x, y] = [ev.offsetX, ev.offsetY];
     for (let handler of handlers) {
       handler.run(x, y);
@@ -114,11 +98,11 @@ export function createHandlers() {
     touching = Date.now();
   }, false);
 
-  canvas.addEventListener("mouseup", function() {
+  canvas.addEventListener("pointerup", function() {
     touching = 0;
   });
 
-  canvas.addEventListener("mousemove", function(ev) {
+  canvas.addEventListener("pointermove", function(ev) {
     mousex = ev.offsetX;
     mousey = ev.offsetY;
   }, false);
